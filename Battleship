@@ -1,0 +1,529 @@
+package battleship;
+import java.io.IOException;
+import java.util.*;
+
+public class Main {
+
+    public static void promptEnterKey() {
+        System.out.println("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+     static class gameField{
+         private char[][] ArrField = new char[12][12];
+         private String[][][] shiplokation = new String[11][11][11];
+         private Scanner scanner = new Scanner(System.in);
+
+
+         public void start(String name) {
+             System.out.println(name + ", place your ships on the game field");
+
+         }
+
+         public void createField() {
+             char AJ = 'A';
+             char oneteen = '1';
+             for (int letter = 0; letter < 12; letter++)
+                 for (int number = 0; number < 12; number++) {
+                     if (letter == 0 && number == 0)
+                         ArrField[letter][number] = ' ';
+                     else if (letter == 0)
+                         ArrField[letter][number] = oneteen++;
+                     else if (number == 0)
+                         ArrField[letter][number] = AJ++;
+                     else
+                         ArrField[letter][number] = '~';
+                 }
+         }
+
+         public char[][] getField() {
+             return ArrField;
+         }
+
+         public void printField() {
+             for (int i = 0; i < 11; i++) {
+                 for (int a = 0; a < 11; a++)
+                     if (ArrField[i][a] == ':')
+                         System.out.print("10");
+                     else
+                         System.out.print(ArrField[i][a] + " ");
+                 System.out.println();
+             }
+
+         }
+
+         public void printFog() {
+             for (int i = 0; i < 11; i++) {
+                 for (int a = 0; a < 11; a++) {
+                     if (ArrField[i][a] == ':')
+                         System.out.print("10");
+                     else if (ArrField[i][a] == 'M')
+                         System.out.print(ArrField[i][a] + " ");
+                     else if (ArrField[i][a] == 'X')
+                         System.out.print(ArrField[i][a] + " ");
+                     else if (ArrField[i][a] == 'O')
+                         System.out.print('~' + " ");
+                     else if (ArrField[i][a] == '~')
+                         System.out.print('~' + " ");
+                     else
+                         System.out.print(ArrField[i][a] + " ");
+                 }
+                 System.out.println();
+             }
+
+
+         }
+        public boolean isSink(int letter, int number){
+             boolean isSink = true;
+             int a = letter;
+             while(a > 0 && a < 11 && ArrField[a][number] != '~'){
+                if(ArrField[a][number] == 'O')
+                    isSink = false;
+                a++;
+             }
+             a = letter;
+             while(a > 0 && a < 11 && ArrField[a][number] != '~'){
+                if(ArrField[a][number] == 'O')
+                    isSink = false;
+                  a--;
+             }
+             a = number;
+             while( a > 0 && a < 11 && ArrField[letter][a] != '~'){
+                if(ArrField[letter][a] == 'O')
+                    isSink = false;
+                a++;
+             }
+             a = number;
+             while( a > 0 && a < 11 && ArrField[letter][a] != '~'){
+                if(ArrField[letter][a] == 'O')
+                    isSink = false;
+                a--;
+             }
+
+
+
+        return isSink;
+        }
+         public void shot() {
+             boolean run = true;
+
+             String input;
+             char letter = '0';
+             boolean empty = true;
+             int number = 12;
+             int letterInt = 12;
+             while(run == true){
+                 input = scanner.nextLine();
+                 if (input.equals(" ") || input.isEmpty()) {
+                     System.out.println("Error! You entered the wrong coordinates! Try again:");
+                     empty = true;
+                     run = true;
+                 } else if (!input.equals(" ") || !input.isEmpty()) {
+                     letter = input.charAt(0);
+                     number = Integer.valueOf(input.substring(1));
+                     letterInt = letter - 64;
+                     empty = false;
+                 }
+               if (empty == false){  
+                 if (letterInt > 10 || number > 10)
+                     System.out.println("Error! You entered the wrong coordinates! Try again:");
+                 else {
+                     if (ArrField[letterInt][number] == '~') {
+                         ArrField[letterInt][number] = 'M';
+                         //this.printFog();
+                         System.out.println("You missed!");
+                         run = false;
+                     } else if (ArrField[letterInt][number] == 'O' || ArrField[letterInt][number] == 'X') {
+                         ArrField[letterInt][number] = 'X';
+                         this.printFog();
+                         if (isWon()) {
+                             System.out.println("You sank the last ship. You won. Congratulations!");
+                             run = false;
+                         }
+                         if (isSink(letterInt, number)) {
+                             System.out.println("You sank a ship!");
+
+                             run = false;
+                         }
+                         if (!isWon() && !isSink(letterInt, number)) {
+                             System.out.println("You hit a ship!");
+                             run = false;
+                         }
+
+                        }
+                    }
+                 } 
+                 } 
+         }
+             public boolean isWon(){
+                 boolean isWon = true;
+                 for (int i = 1; i < 11; i++)
+                     for (int a = 1; a < 11; a++)
+                         if (ArrField[i][a] == 'O')
+                             isWon = false;
+
+                 return isWon;
+             }
+
+             public boolean toClose ( int letterInt, int number, int letterInt2, int number2 ){
+                 boolean close = false;
+                 if (letterInt == letterInt2)
+                     for (int a = number; a <= number2; a++) {
+                         if (ArrField[letterInt][a - 1] == 'O' || ArrField[letterInt - 1][a - 1] == 'O' || ArrField[letterInt + 1][a - 1] == 'O' || ArrField[letterInt + 1][a] == 'O'
+                                 || ArrField[letterInt - 1][a] == 'O' || ArrField[letterInt][a] == 'O' || ArrField[letterInt + 1][a + 1] == 'O' || ArrField[letterInt][a + 1] == 'O' ||
+                                 ArrField[letterInt - 1][a + 1] == 'O' || ArrField[letterInt + 1][a] == 'O')
+                             close = true;
+                     }
+                 else if (number == number2) {
+                     for (int a = letterInt; a <= letterInt2; a++) {
+                         if (ArrField[a][number - 1] == 'O' || ArrField[a - 1][number - 1] == 'O' || ArrField[a + 1][number - 1] == 'O' || ArrField[a + 1][number] == 'O'
+                                 || ArrField[a - 1][number] == 'O' || ArrField[a][number] == 'O' || ArrField[a + 1][number + 1] == 'O' || ArrField[a][number + 1] == 'O' ||
+                                 ArrField[a - 1][number + 1] == 'O' || ArrField[a + 1][number] == 'O') close = true;
+                     }
+
+
+                 }
+                 return close;
+             }
+             public void AircraftCarrier () {
+                 boolean run = true;
+                    int HP_AircraftCarrier = 5;
+                 System.out.println("Enter the coordinates of the Aircraft Carrier (5 cells):");
+                 while (run == true) {
+
+                     String input = scanner.nextLine();
+
+
+                     String[] position = position = input.split(" ");
+
+                     char letter = position[0].charAt(0);
+                     int number = Integer.valueOf(position[0].substring(1));
+                     int letterInt = letter - 64;
+                     char letter2 = position[1].charAt(0);
+                     int number2 = Integer.valueOf(position[1].substring(1));
+                     int letterInt2 = letter2 - 64;
+                     int letterIntTemp;
+                     int numberTemp;
+                     if (letterInt > letterInt2 || number > number2) {
+                         letterIntTemp = letterInt2;
+                         letterInt2 = letterInt;
+                         letterInt = letterIntTemp;
+
+                         numberTemp = number2;
+                         number2 = number;
+                         number = numberTemp;
+                     }
+
+                     if (letterInt > 10 || letterInt2 > 10 || number2 > 10 || number > 10)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (number != number2 && letterInt != letterInt2)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (this.toClose(letterInt, number, letterInt2, number2))
+                         System.out.println("Error! You placed it too close to another one. Try again:");
+                     else if (letterInt2 - letterInt == 4 || number2 - number == 4) {
+                         run = false;
+                         if (letterInt == letterInt2)
+                             for (int a = number; a <= number2; a++) {
+                                 ArrField[letterInt][a] = 'O';
+                             }
+                         else if (number == number2) {
+                             for (int a = letterInt; a <= letterInt2; a++) {
+                                 ArrField[a][number] = 'O';
+
+                             }
+
+                         }
+
+                     } else {
+                         System.out.println("Error! Wrong length of the Aircraft Carrier! Try again:");
+                     }
+                 }
+             }
+             public void Battleship () {
+                 boolean run = true;
+                int HP_Battleship = 4;
+                 System.out.println("Enter the coordinates of the Battleship (4 cells):");
+                 while (run == true) {
+
+                     String input = scanner.nextLine();
+                     String[] position = input.split(" ");
+                     char letter = position[0].charAt(0);
+                     int number = Integer.valueOf(position[0].substring(1));
+                     int letterInt = letter - 64;
+                     char letter2 = position[1].charAt(0);
+                     int number2 = Integer.valueOf(position[1].substring(1));
+                     int letterInt2 = letter2 - 64;
+
+                     int letterIntTemp;
+                     int numberTemp;
+                     if (letterInt > letterInt2 || number > number2) {
+                         letterIntTemp = letterInt2;
+                         letterInt2 = letterInt;
+                         letterInt = letterIntTemp;
+
+                         numberTemp = number2;
+                         number2 = number;
+                         number = numberTemp;
+                     }
+
+
+                     if (letterInt > 10 || letterInt2 > 10 || number2 > 10 || number > 10)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (number != number2 && letterInt != letterInt2)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (this.toClose(letterInt, number, letterInt2, number2))
+                         System.out.println("Error! You placed it too close to another one. Try again:");
+                     else if (letterInt2 - letterInt == 3 || number2 - number == 3) {
+                         run = false;
+                         if (letterInt == letterInt2)
+                             for (int a = number; a <= number2; a++) {
+                                 ArrField[letterInt][a] = 'O';
+                             }
+                         else if (number == number2) {
+                             for (int a = letterInt; a <= letterInt2; a++) {
+                                 ArrField[a][number] = 'O';
+
+                             }
+
+                         }
+
+                     } else {
+                         System.out.println("Error! Wrong length of the Battleship! Try again:");
+                     }
+                 }
+             }
+             public void Submarine () {
+                 boolean run = true;
+                int HP_Submarine = 3;
+                 System.out.println("Enter the coordinates of the Submarine (3 cells):");
+                 while (run == true) {
+
+                     String input = scanner.nextLine();
+                     String[] position = input.split(" ");
+                     char letter = position[0].charAt(0);
+                     int number = Integer.valueOf(position[0].substring(1));
+                     int letterInt = letter - 64;
+                     char letter2 = position[1].charAt(0);
+                     int number2 = Integer.valueOf(position[1].substring(1));
+                     int letterInt2 = letter2 - 64;
+
+                     int letterIntTemp;
+                     int numberTemp;
+                     if (letterInt > letterInt2 || number > number2) {
+                         letterIntTemp = letterInt2;
+                         letterInt2 = letterInt;
+                         letterInt = letterIntTemp;
+
+                         numberTemp = number2;
+                         number2 = number;
+                         number = numberTemp;
+                     }
+
+                     if (letterInt > 10 || letterInt2 > 10 || number2 > 10 || number > 10)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (number != number2 && letterInt != letterInt2)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (this.toClose(letterInt, number, letterInt2, number2))
+                         System.out.println("Error! You placed it too close to another one. Try again:");
+                     else if (letterInt2 - letterInt == 2 || number2 - number == 2) {
+                         run = false;
+                         if (letterInt == letterInt2)
+                             for (int a = number; a <= number2; a++) {
+                                 ArrField[letterInt][a] = 'O';
+                             }
+                         else if (number == number2) {
+                             for (int a = letterInt; a <= letterInt2; a++) {
+                                 ArrField[a][number] = 'O';
+
+                             }
+
+                         }
+
+                     } else {
+                         System.out.println("Error! Wrong length of the Submarine! Try again:");
+                     }
+                 }
+             }
+
+             public void Cruiser (){
+                 boolean run = true;
+                    int HP_Cruiser;
+                 System.out.println("Enter the coordinates of the Cruiser (3 cells):");
+                 while (run == true) {
+
+                     String input = scanner.nextLine();
+                     String[] position = input.split(" ");
+                     char letter = position[0].charAt(0);
+                     int number = Integer.valueOf(position[0].substring(1));
+                     int letterInt = letter - 64;
+                     char letter2 = position[1].charAt(0);
+                     int number2 = Integer.valueOf(position[1].substring(1));
+                     int letterInt2 = letter2 - 64;
+
+                     int letterIntTemp;
+                     int numberTemp;
+                     if (letterInt > letterInt2 || number > number2) {
+                         letterIntTemp = letterInt2;
+                         letterInt2 = letterInt;
+                         letterInt = letterIntTemp;
+
+                         numberTemp = number2;
+                         number2 = number;
+                         number = numberTemp;
+                     }
+
+                     if (letterInt > 10 || letterInt2 > 10 || number2 > 10 || number > 10)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (number != number2 && letterInt != letterInt2)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (this.toClose(letterInt, number, letterInt2, number2))
+                         System.out.println("Error! You placed it too close to another one. Try again:");
+                     else if (letterInt2 - letterInt == 2 || number2 - number == 2) {
+                         run = false;
+                         if (letterInt == letterInt2)
+                             for (int a = number; a <= number2; a++) {
+                                 ArrField[letterInt][a] = 'O';
+                             }
+                         else if (number == number2) {
+                             for (int a = letterInt; a <= letterInt2; a++) {
+                                 ArrField[a][number] = 'O';
+
+                             }
+
+                         }
+
+                     } else {
+                         System.out.println("Error! Wrong length of the Cruiser! Try again:");
+                     }
+                 }
+             }
+
+             public void Destroyer() {
+                 boolean run = true;
+                int HP_Destroyer = 2;
+                 System.out.println("Enter the coordinates of the Destroyer (2 cells):");
+                 while (run == true) {
+
+                     String input = scanner.nextLine();
+                     String[] position = input.split(" ");
+                     char letter = position[0].charAt(0);
+                     int number = Integer.valueOf(position[0].substring(1));
+                     int letterInt = letter - 64;
+                     char letter2 = position[1].charAt(0);
+                     int number2 = Integer.valueOf(position[1].substring(1));
+                     int letterInt2 = letter2 - 64;
+
+                     int letterIntTemp;
+                     int numberTemp;
+                     if (letterInt > letterInt2 || number > number2) {
+                         letterIntTemp = letterInt2;
+                         letterInt2 = letterInt;
+                         letterInt = letterIntTemp;
+
+                         numberTemp = number2;
+                         number2 = number;
+                         number = numberTemp;
+                     }
+
+                     if (letterInt > 10 || letterInt2 > 10 || number2 > 10 || number > 10)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (number != number2 && letterInt != letterInt2)
+                         System.out.println("Error! Wrong ship location! Try again:");
+                     else if (this.toClose(letterInt, number, letterInt2, number2))
+                         System.out.println("Error! You placed it too close to another one. Try again:");
+                     else if (letterInt2 - letterInt == 1 || number2 - number == 1) {
+                         run = false;
+                         if (letterInt == letterInt2)
+                             for (int a = number; a <= number2; a++) {
+                                 ArrField[letterInt][a] = 'O';
+                             }
+                         else if (number == number2) {
+                             for (int a = letterInt; a <= letterInt2; a++) {
+                                 ArrField[a][number] = 'O';
+
+                             }
+
+                         }
+
+                     } else {
+                         System.out.println("Error! Wrong length of the Destroyer! Try again:");
+                     }
+                 }
+             }
+
+
+         }
+
+         public static void main(String[] args) {
+             gameField player1 = new gameField();
+             gameField player2 = new gameField();
+
+             //promptEnterKey enter = new promptEnterKey();
+             //player 1
+             player1.start("Player 1");
+             player1.createField();
+             player1.printField();
+             player1.AircraftCarrier();
+             player1.printField();
+             player1.Battleship();
+             player1.printField();
+             player1.Submarine();
+             player1.printField();
+             player1.Cruiser();
+             player1.printField();
+             player1.Destroyer();
+             player1.printField();
+             // player 2
+             promptEnterKey();
+             player2.start("Player 2");
+             player2.createField();
+             player2.printField();
+             player2.AircraftCarrier();
+             player2.printField();
+             player2.Battleship();
+             player2.printField();
+             player2.Submarine();
+             player2.printField();
+             player2.Cruiser();
+             player2.printField();
+             player2.Destroyer();
+             player2.printField();
+
+
+            // System.out.println("The game starts!");
+            Scanner sc = new Scanner(System.in);
+
+             promptEnterKey();
+
+             player2.printFog();
+             System.out.println("---------------------");
+             player1.printField();
+
+             while (player1.isWon() == false || player2.isWon() == false) {
+                 //player 1
+                 System.out.println("Player 1, it's your turn:");
+
+                 player2.shot();
+                 promptEnterKey();
+
+                 player1.printFog();
+                 System.out.println("---------------------");
+                 player2.printField();
+
+
+                 //player 2
+                 System.out.println("Player 2, it's your turn:");
+                 player1.shot();
+                 promptEnterKey();
+                 player2.printFog();
+                 System.out.println("---------------------");
+                 player1.printField();
+                 //package battleship;
+
+
+             }
+         }
+     }
